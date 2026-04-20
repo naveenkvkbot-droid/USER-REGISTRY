@@ -4,7 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { FaceEmbeddingsModule } from './face-embeddings/face-embeddings.module';
 import { ConversationsModule } from './conversations/conversations.module';
-import { InitialSchema001 } from './database/migrations/001_initial_schema';
 
 @Module({
   imports: [
@@ -22,9 +21,9 @@ import { InitialSchema001 } from './database/migrations/001_initial_schema';
         username: configService.get('DATABASE_USER', 'postgres'),
         password: configService.get('DATABASE_PASSWORD', 'dev_password'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: false, // Use migrations instead
-        migrations: [InitialSchema001],
-        migrationsRun: true,
+        migrations: [__dirname + '/migrations-disabled-path/**/*.ts'],
+        synchronize: true, // Auto-create schema from entities
+        migrationsRun: false,
       }),
       inject: [ConfigService],
     }),
