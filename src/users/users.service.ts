@@ -4,6 +4,13 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 
+interface ConversationSummary {
+  id: string;
+  topics: unknown[];
+  actionItems: unknown[];
+  occurredAt: Date;
+}
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -30,14 +37,14 @@ export class UsersService {
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.findByIdOrThrow(id);
-    
+
     if (dto.name !== undefined) {
       user.name = dto.name;
     }
     if (dto.notes !== undefined) {
       user.notes = dto.notes;
     }
-    
+
     return this.userRepository.save(user);
   }
 
@@ -47,7 +54,7 @@ export class UsersService {
 
   async getUserSummary(id: string): Promise<{
     user: User;
-    conversations: any[];
+    conversations: ConversationSummary[];
     faceCount: number;
   }> {
     const user = await this.userRepository.findOne({
@@ -60,13 +67,18 @@ export class UsersService {
     }
 
     const sortedConversations = (user.conversations || [])
-      .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())
-      .map(c => ({
-        id: c.id,
-        topics: c.topics,
-        actionItems: c.actionItems,
-        occurredAt: c.occurredAt,
-      }));
+      .sort(
+        (a, b) =>
+          new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
+      )
+      .map(
+        (c): ConversationSummary => ({
+          id: c.id,
+          topics: c.topics,
+          actionItems: c.actionItems,
+          occurredAt: c.occurredAt,
+        }),
+      );
 
     return {
       user,

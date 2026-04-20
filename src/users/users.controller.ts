@@ -1,4 +1,11 @@
-import { Controller, Get, Patch, Param, Body, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Param,
+  Body,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -40,13 +47,14 @@ export class UsersController {
           firstSeenAt: summary.user.firstSeenAt.toISOString(),
           lastSeenAt: summary.user.lastSeenAt.toISOString(),
         },
-        conversations: summary.conversations.map(c => ({
+        conversations: summary.conversations.map((c) => ({
           id: c.id,
           topics: c.topics,
           actionItems: c.actionItems,
-          occurredAt: c.occurredAt instanceof Date
-            ? c.occurredAt.toISOString()
-            : c.occurredAt,
+          occurredAt:
+            c.occurredAt instanceof Date
+              ? c.occurredAt.toISOString()
+              : new Date(c.occurredAt).toISOString(),
         })),
         faceCount: summary.faceCount,
       },

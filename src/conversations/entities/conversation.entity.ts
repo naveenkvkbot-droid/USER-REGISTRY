@@ -31,7 +31,12 @@ export class Conversation {
   @Column({ type: 'int', name: 'duration_seconds' })
   durationSeconds: number;
 
-  @Column({ type: 'varchar', length: 200, nullable: true, name: 'location_hint' })
+  @Column({
+    type: 'varchar',
+    length: 200,
+    nullable: true,
+    name: 'location_hint',
+  })
   locationHint: string | null;
 
   @Column({ type: 'timestamptz', name: 'occurred_at' })

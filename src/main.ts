@@ -32,4 +32,4 @@ async function bootstrap() {
   console.log(`User Registry service running on port ${port}`);
 }
 
-bootstrap();
+void bootstrap();

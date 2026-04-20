@@ -1,4 +1,12 @@
-import { IsArray, ArrayMinSize, ArrayMaxSize, IsNumber, IsOptional, Min, Max } from 'class-validator';
+import {
+  IsArray,
+  ArrayMinSize,
+  ArrayMaxSize,
+  IsNumber,
+  IsOptional,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class FaceSearchDto {
   @IsArray()

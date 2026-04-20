@@ -20,7 +20,10 @@ export class FaceEmbeddingsService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async findClosestMatch(embedding: number[], threshold: number): Promise<MatchResult> {
+  async findClosestMatch(
+    embedding: number[],
+    threshold: number,
+  ): Promise<MatchResult> {
     // Format the embedding as a vector string for pgvector
     const vectorString = `[${embedding.join(',')}]`;
 
@@ -42,36 +45,51 @@ export class FaceEmbeddingsService {
       LIMIT 1
     `;
 
-    const results: any[] = await this.dataSource.query(query, [vectorString]);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const results = await this.dataSource.query(query, [vectorString]);
 
-    if (results.length === 0) {
+    if ((results as unknown[]).length === 0) {
       return { matched: false, user: null, confidence: null, distance: null };
     }
 
-    const result = results[0];
-    const distance = parseFloat(result.distance);
+    const result = (results as unknown[])[0];
+
+    const distance = parseFloat(
+      String((result as Record<string, unknown>).distance),
+    );
 
     // Cosine distance: 0 = identical, 2 = opposite
     // Convert to confidence: 1 = perfect match, 0 = opposite
-    const confidence = 1 - (distance / 2);
+    const confidence = 1 - distance / 2;
 
     if (distance > threshold) {
       return { matched: false, user: null, confidence: null, distance };
     }
 
+    const resultObj = result as Record<string, unknown>;
     const user = new User();
-    user.id = result.id;
-    user.name = result.name;
-    user.notes = result.notes;
-    user.firstSeenAt = new Date(result.firstSeenAt);
-    user.lastSeenAt = new Date(result.lastSeenAt);
-    user.locationHint = result.locationHint;
-    user.createdAt = new Date(result.createdAt);
+
+    user.id = resultObj.id as string;
+
+    user.name = resultObj.name as string | null;
+
+    user.notes = resultObj.notes as string | null;
+
+    user.firstSeenAt = new Date(resultObj.firstSeenAt as string);
+
+    user.lastSeenAt = new Date(resultObj.lastSeenAt as string);
+
+    user.locationHint = resultObj.locationHint as string | null;
+
+    user.createdAt = new Date(resultObj.createdAt as string);
 
     return { matched: true, user, confidence, distance };
   }
 
-  async getRecentConversations(userId: string, limit: number = 3): Promise<Partial<Conversation>[]> {
+  async getRecentConversations(
+    userId: string,
+    limit: number = 3,
+  ): Promise<Partial<Conversation>[]> {
     const query = `
       SELECT 
         id,
@@ -84,14 +102,23 @@ export class FaceEmbeddingsService {
       LIMIT $2
     `;
 
-    const results: any[] = await this.dataSource.query(query, [userId, limit]);
-    
-    return results.map((r: any) => ({
-      id: r.id,
-      topics: r.topics || [],
-      actionItems: r.actionItems || [],
-      occurredAt: r.occurredAt,
-    }));
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const results = await this.dataSource.query(query, [userId, limit]);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    return (results as unknown[]).map((r) => {
+      const row = r as Record<string, unknown>;
+      return {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        id: row.id as string,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        topics: (row.topics as string[]) || [],
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        actionItems: (row.actionItems as string[]) || [],
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        occurredAt: row.occurredAt as Date,
+      };
+    });
   }
 
   async registerFace(
@@ -112,10 +139,10 @@ export class FaceEmbeddingsService {
 
       if (existingUserId) {
         // Verify the user exists
-        const userExists = await queryRunner.query(
+        const userExists = (await queryRunner.query(
           'SELECT id FROM users WHERE id = $1',
           [existingUserId],
-        );
+        )) as Array<{ id: string }>;
         if (userExists.length === 0) {
           throw new NotFoundException('Existing user not found');
         }
@@ -123,24 +150,24 @@ export class FaceEmbeddingsService {
         isNewUser = false;
       } else {
         // Create new user
-        const userResult = await queryRunner.query(
+        const userResult = (await queryRunner.query(
           `INSERT INTO users (name, notes, first_seen_at, last_seen_at, location_hint, created_at)
            VALUES (NULL, NULL, NOW(), NOW(), $1, NOW())
            RETURNING id`,
           [locationHint],
-        );
+        )) as Array<{ id: string }>;
         userId = userResult[0].id;
         isNewUser = true;
       }
 
       // Insert face embedding
       const vectorString = `[${embedding.join(',')}]`;
-      const faceResult = await queryRunner.query(
+      const faceResult = (await queryRunner.query(
         `INSERT INTO face_embeddings (user_id, embedding, confidence_score, source, snapshot_url, captured_at)
          VALUES ($1, $2::vector, $3, $4, $5, NOW())
          RETURNING id`,
         [userId, vectorString, confidenceScore, source, snapshotUrl],
-      );
+      )) as Array<{ id: string }>;
       const faceEmbeddingId = faceResult[0].id;
 
       await queryRunner.commitTransaction();

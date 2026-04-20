@@ -26,15 +26,24 @@ export class User {
   @UpdateDateColumn({ type: 'timestamptz', name: 'last_seen_at' })
   lastSeenAt: Date;
 
-  @Column({ type: 'varchar', length: 200, nullable: true, name: 'location_hint' })
+  @Column({
+    type: 'varchar',
+    length: 200,
+    nullable: true,
+    name: 'location_hint',
+  })
   locationHint: string | null;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt: Date;
 
-  @OneToMany(() => FaceEmbedding, (embedding) => embedding.user, { cascade: true })
+  @OneToMany(() => FaceEmbedding, (embedding) => embedding.user, {
+    cascade: true,
+  })
   faceEmbeddings: FaceEmbedding[];
 
-  @OneToMany(() => Conversation, (conversation) => conversation.user, { cascade: true })
+  @OneToMany(() => Conversation, (conversation) => conversation.user, {
+    cascade: true,
+  })
   conversations: Conversation[];
 }

@@ -10,7 +10,10 @@ export class FaceEmbeddingsController {
   @Post('search')
   async search(@Body() dto: FaceSearchDto) {
     const threshold = dto.threshold ?? 0.4;
-    const result = await this.faceEmbeddingsService.findClosestMatch(dto.embedding, threshold);
+    const result = await this.faceEmbeddingsService.findClosestMatch(
+      dto.embedding,
+      threshold,
+    );
 
     if (!result.matched || !result.user) {
       return {
@@ -24,10 +27,11 @@ export class FaceEmbeddingsController {
       };
     }
 
-    const recentConversations = await this.faceEmbeddingsService.getRecentConversations(
-      result.user.id,
-      3,
-    );
+    const recentConversations =
+      await this.faceEmbeddingsService.getRecentConversations(
+        result.user.id,
+        3,
+      );
 
     return {
       data: {
@@ -39,12 +43,13 @@ export class FaceEmbeddingsController {
           lastSeenAt: result.user.lastSeenAt.toISOString(),
         },
         confidence: result.confidence,
-        recentConversations: recentConversations.map(c => ({
+        recentConversations: recentConversations.map((c) => ({
           topics: c.topics,
           actionItems: c.actionItems,
-          occurredAt: c.occurredAt instanceof Date 
-            ? c.occurredAt.toISOString() 
-            : c.occurredAt,
+          occurredAt:
+            c.occurredAt instanceof Date
+              ? c.occurredAt.toISOString()
+              : c.occurredAt,
         })),
       },
       error: null,

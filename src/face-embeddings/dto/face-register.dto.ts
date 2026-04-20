@@ -1,4 +1,14 @@
-import { IsArray, ArrayMinSize, ArrayMaxSize, IsNumber, IsString, IsOptional, IsUUID, Min, Max } from 'class-validator';
+import {
+  IsArray,
+  ArrayMinSize,
+  ArrayMaxSize,
+  IsNumber,
+  IsString,
+  IsOptional,
+  IsUUID,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class FaceRegisterDto {
   @IsArray()

@@ -31,7 +31,12 @@ export class FaceEmbedding {
   @Column({ type: 'varchar', length: 32, default: 'mediapipe', name: 'source' })
   source: string;
 
-  @Column({ type: 'varchar', length: 500, nullable: true, name: 'snapshot_url' })
+  @Column({
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+    name: 'snapshot_url',
+  })
   snapshotUrl: string | null;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'captured_at' })

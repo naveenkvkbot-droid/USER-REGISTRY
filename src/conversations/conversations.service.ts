@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Conversation } from './entities/conversation.entity';
-import { User } from '../users/entities/user.entity';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 
 @Injectable()
@@ -13,22 +12,27 @@ export class ConversationsService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async create(dto: CreateConversationDto): Promise<{ conversationId: string }> {
+  async create(
+    dto: CreateConversationDto,
+  ): Promise<{ conversationId: string }> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
       // Verify user exists
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const userExists = await queryRunner.query(
         'SELECT id FROM users WHERE id = $1',
         [dto.userId],
       );
-      if (userExists.length === 0) {
+
+      if ((userExists as unknown[]).length === 0) {
         throw new NotFoundException('User not found');
       }
 
       // Insert conversation
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await queryRunner.query(
         `INSERT INTO conversations (user_id, transcript, topics, action_items, duration_seconds, location_hint, occurred_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -43,7 +47,10 @@ export class ConversationsService {
           dto.occurredAt,
         ],
       );
-      const conversationId = result[0].id;
+
+      const conversationId = (
+        (result as unknown[])[0] as Record<string, unknown>
+      ).id as string;
 
       // Update user's last_seen_at
       await queryRunner.query(
@@ -62,7 +69,10 @@ export class ConversationsService {
     }
   }
 
-  async findByUserId(userId: string, limit: number = 10): Promise<Conversation[]> {
+  async findByUserId(
+    userId: string,
+    limit: number = 10,
+  ): Promise<Conversation[]> {
     return this.conversationRepository.find({
       where: { userId },
       order: { occurredAt: 'DESC' },

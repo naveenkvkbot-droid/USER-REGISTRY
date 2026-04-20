@@ -1,4 +1,11 @@
-import { IsString, IsUUID, IsArray, IsNumber, IsOptional, IsISO8601 } from 'class-validator';
+import {
+  IsString,
+  IsUUID,
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsISO8601,
+} from 'class-validator';
 
 export class CreateConversationDto {
   @IsUUID()

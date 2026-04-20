@@ -22,9 +22,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let message = 'An unexpected error occurred';
 
     if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
-      const resp = exceptionResponse as any;
-      errorCode = resp.code || resp.error || this.getErrorCodeFromStatus(status);
-      message = resp.message || message;
+      const resp = exceptionResponse as Record<string, unknown>;
+      errorCode =
+        (resp.code as string) ||
+        (resp.error as string) ||
+        this.getErrorCodeFromStatus(status);
+      message = (resp.message as string) || message;
     } else if (typeof exceptionResponse === 'string') {
       message = exceptionResponse;
       errorCode = this.getErrorCodeFromStatus(status);
