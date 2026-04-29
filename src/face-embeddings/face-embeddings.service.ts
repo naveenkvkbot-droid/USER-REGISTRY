@@ -105,17 +105,15 @@ export class FaceEmbeddingsService {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const results = await this.dataSource.query(query, [userId, limit]);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     return (results as unknown[]).map((r) => {
       const row = r as Record<string, unknown>;
       return {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         id: row.id as string,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
         topics: (row.topics as string[]) || [],
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
         actionItems: (row.actionItems as string[]) || [],
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
         occurredAt: row.occurredAt as Date,
       };
     });

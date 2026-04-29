@@ -10,8 +10,8 @@ import {
 
 export class FaceSearchDto {
   @IsArray()
-  @ArrayMinSize(128)
-  @ArrayMaxSize(128)
+  @ArrayMinSize(512)
+  @ArrayMaxSize(512)
   @IsNumber({}, { each: true })
   embedding: number[];
 
